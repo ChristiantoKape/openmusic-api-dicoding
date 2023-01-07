@@ -14,11 +14,10 @@ class SongsService {
   }) {
     const id = `song-${nanoid(16)}`;
     const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
 
     const query = {
-      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
-      values: [id, title, year, performer, genre, duration, albumId, createdAt, updatedAt],
+      text: 'INSERT INTO songs VALUES($1, $2, $3, $4, $5, $6, $7, $8, $8) RETURNING id',
+      values: [id, title, year, performer, genre, duration, albumId, createdAt],
     };
 
     const result = await this._pool.query(query);
@@ -30,24 +29,13 @@ class SongsService {
     return result.rows[0].id;
   }
 
-  async getSongs({
-    title, performer,
-  }) {
-    let filteredSongs = await this._pool.query('SELECT id, title, performer FROM songs');
-
-    if (title !== undefined) {
-      const query = {
-        text: 'SELECT id, title, performer FROM songs WHERE LOWER(title) LIKE $1',
-        values: [`%${title}%`],
-      };
-      filteredSongs = await this._pool.query(query);
-    }
-
-    if (performer !== undefined) {
-      filteredSongs = await this._pool.query(`SELECT id, title, performer FROM songs WHERE LOWER(performer) LIKE '%${performer}%'`);
-    }
-
-    return filteredSongs.rows.map(mapDBToModel);
+  async getSongs({ title = '', performer = '' }) {
+    const query = {
+      text: 'SELECT id, title, performer FROM songs WHERE title ILIKE $1 AND performer ILIKE $2',
+      values: [`%${title}%`, `%${performer}%`],
+    };
+    const result = await this._pool.query(query);
+    return result.rows;
   }
 
   async getSongById(id) {

@@ -12,15 +12,8 @@ class SongsHandler {
 
   async postSongHandler(request, h) {
     this._validator.validateSongPayload(request.payload);
-    const {
-      title, year, genre, performer, duration, albumId,
-    } = request.payload;
 
-    const songId = await this._service.addSong(
-      {
-        title, year, genre, performer, duration, albumId,
-      },
-    );
+    const songId = await this._service.addSong(request.payload);
 
     const response = h.response({
       status: 'success',
@@ -34,18 +27,12 @@ class SongsHandler {
   }
 
   async getSongsHandler(request) {
-    const { title, performer } = request.query;
-    const songs = await this._service.getSongs({ title, performer });
-
+    const { title, performer, albumId } = request.query;
+    const songs = await this._service.getSongs({ title, performer, albumId });
     return {
       status: 'success',
       data: {
-        // mengeluarkan data id, title, performer
-        songs: songs.map((song) => ({
-          id: song.id,
-          title: song.title,
-          performer: song.performer,
-        })),
+        songs,
       },
     };
   }

@@ -18,8 +18,8 @@ class PlaylistSongsHandler {
     const { songId } = request.payload;
     const { id: playlistId } = request.params;
 
-    await this._playlistService.verifyPlaylistAccess(playlistId, credentialId);
     await this._songsService.verifySongExists(songId);
+    await this._playlistService.verifyPlaylistAccess(playlistId, credentialId);
     await this._playlistSongsService.addSongToPlaylist({
       songId, playlistId, userId: credentialId,
     });
